@@ -3,6 +3,7 @@ package com.plagiarismchecker.utils;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 import java.io.IOException;
+import java.nio.file.NoSuchFileException;
 
 public class FileHandlerUtilTest {
 
@@ -31,4 +32,17 @@ public class FileHandlerUtilTest {
             FileHandlerUtil.readFile(invalidFilePath);
         });
     }
+
+    @Test
+    public void testReadFileWithInvalidPath() {
+        try {
+            FileHandlerUtil.readFile("non_existent_file.txt");
+            // 如果没有抛出异常，则测试失败
+            fail("Expected NoSuchFileException to be thrown");
+        } catch (IOException e) {
+            // 预期的异常被抛出，测试通过
+            assertTrue(true);
+        }
+    }
+
 }

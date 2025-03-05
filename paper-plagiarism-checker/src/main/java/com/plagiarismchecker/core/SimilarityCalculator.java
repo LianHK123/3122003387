@@ -1,36 +1,55 @@
 package com.plagiarismchecker.core;
 
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class SimilarityCalculator {
-    // 计算文本哈希值
-    public static String computeHash(String text) throws NoSuchAlgorithmException {
-        MessageDigest md = MessageDigest.getInstance("SHA-256");
-        byte[] hashBytes = md.digest(text.getBytes());
-        StringBuilder hexString = new StringBuilder();
-        for (byte b : hashBytes) {
-            hexString.append(String.format("%02x", b));
+    // 计算词频向量
+    private static Map<String, Integer> computeTermFrequency(List<String> words) {
+        Map<String, Integer> termFrequency = new HashMap<>();
+        for (String word : words) {
+            termFrequency.put(word, termFrequency.getOrDefault(word, 0) + 1);
         }
-        return hexString.toString();
+        return termFrequency;
     }
 
-    // 比较两个文本的哈希值
-    public static double compareHashes(String hash1, String hash2) {
-        int diff = 0;
-        for (int i = 0; i < hash1.length(); i++) {
-            if (hash1.charAt(i) != hash2.charAt(i)) {
-                diff++;
-            }
+    // 计算余弦相似度
+    public static double calculateCosineSimilarity(Map<String, Integer> tf1, Map<String, Integer> tf2) {
+        double dotProduct = 0.0;
+        double normA = 0.0;
+        double normB = 0.0;
+
+        // 计算点积和向量的模
+        for (String term : tf1.keySet()) {
+            int freqA = tf1.get(term);
+            int freqB = tf2.getOrDefault(term, 0);
+            dotProduct += freqA * freqB;
+            normA += freqA * freqA;
         }
-        // 计算相似度
-        return 1.0 - ((double) diff / hash1.length());
+
+        for (String term : tf2.keySet()) {
+            int freqB = tf2.get(term);
+            normB += freqB * freqB;
+        }
+
+        // 计算余弦相似度
+        if (normA == 0.0 || normB == 0.0) {
+            return 0.0;
+        }
+
+        return dotProduct / (Math.sqrt(normA) * Math.sqrt(normB));
     }
 
     // 计算文本相似度
-    public static double calculateSimilarity(String text1, String text2) throws NoSuchAlgorithmException {
-        String hash1 = computeHash(text1);
-        String hash2 = computeHash(text2);
-        return compareHashes(hash1, hash2);
+    public static double calculateSimilarity(String text1, String text2) {
+        TextPreprocessor textPreprocessor = new TextPreprocessor();
+        List<String> tokens1 = textPreprocessor.extractFeatures(text1);
+        List<String> tokens2 = textPreprocessor.extractFeatures(text2);
+
+        Map<String, Integer> tf1 = computeTermFrequency(tokens1);
+        Map<String, Integer> tf2 = computeTermFrequency(tokens2);
+
+        return calculateCosineSimilarity(tf1, tf2);
     }
 }

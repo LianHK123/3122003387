@@ -1,53 +1,95 @@
 package com.plagiarismchecker.core;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
 
-import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
 import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class TextPreprocessorTest {
 
+    private TextPreprocessor textPreprocessor;
+
+    @BeforeEach
+    public void setUp() {
+        textPreprocessor = new TextPreprocessor();
+    }
+
     @Test
     public void testTokenize() {
-        String text = "Hello, world!";
-        List<String> tokens = TextPreprocessor.tokenize(text);
-        assertEquals(2, tokens.size());  // "hello" 和 "world"
-        assertTrue(tokens.contains("hello"));
-        assertTrue(tokens.contains("world"));
+        // 测试用例1：正常输入
+        String text1 = "Hello, World!";
+        List<String> expected1 = Arrays.asList("hello", "world");
+        List<String> actual1 = textPreprocessor.tokenize(text1);
+        assertEquals(expected1, actual1);
+
+        // 测试用例2：空字符串
+        String text2 = "";
+        Exception exception2 = assertThrows(IllegalArgumentException.class, () -> {
+            textPreprocessor.tokenize(text2);
+        });
+        assertEquals("Input text cannot be null or empty", exception2.getMessage());
+
+        // 测试用例3：null 输入
+        String text3 = null;
+        Exception exception3 = assertThrows(IllegalArgumentException.class, () -> {
+            textPreprocessor.tokenize(text3);
+        });
+        assertEquals("Input text cannot be null or empty", exception3.getMessage());
+
+        // 测试用例4：仅包含停用词
+        String text4 = "the and is in at which on for with a an";
+        List<String> expected4 = Arrays.asList();
+        List<String> actual4 = textPreprocessor.tokenize(text4);
+        assertEquals(expected4, actual4);
     }
 
     @Test
     public void testRemoveStopWords() {
-        List<String> words = List.of("the", "quick", "brown", "fox");
-        List<String> cleanedWords = TextPreprocessor.removeStopWords(words);
-        assertEquals(3, cleanedWords.size());  // "quick", "brown", "fox"
-        assertFalse(cleanedWords.contains("the"));
+        // 测试用例1：正常输入
+        List<String> words1 = Arrays.asList("hello", "the", "world", "and");
+        List<String> expected1 = Arrays.asList("hello", "world");
+        List<String> actual1 = textPreprocessor.removeStopWords(words1);
+        assertEquals(expected1, actual1);
+
+        // 测试用例2：仅包含停用词
+        List<String> words2 = Arrays.asList("the", "and", "is", "in", "at");
+        List<String> expected2 = Arrays.asList();
+        List<String> actual2 = textPreprocessor.removeStopWords(words2);
+        assertEquals(expected2, actual2);
+
+        // 测试用例3：不包含停用词
+        List<String> words3 = Arrays.asList("hello", "world");
+        List<String> expected3 = Arrays.asList("hello", "world");
+        List<String> actual3 = textPreprocessor.removeStopWords(words3);
+        assertEquals(expected3, actual3);
+
+        // 测试用例4：空列表
+        List<String> words4 = Arrays.asList();
+        List<String> expected4 = Arrays.asList();
+        List<String> actual4 = textPreprocessor.removeStopWords(words4);
+        assertEquals(expected4, actual4);
     }
 
     @Test
-    public void testExtractFeatures() {
-        String text = "The quick brown fox";
-        List<String> features = TextPreprocessor.extractFeatures(text);
-        assertEquals(3, features.size());  // "quick", "brown", "fox"
-        assertFalse(features.contains("the"));
+    public void testTokenizeWithNullInput() {
+        TextPreprocessor preprocessor = new TextPreprocessor();
+        try {
+            preprocessor.tokenize(null);
+            fail("Expected IllegalArgumentException to be thrown");
+        } catch (IllegalArgumentException e) {
+            assertEquals("Input text cannot be null or empty", e.getMessage());
+        }
     }
+
 
     @Test
-    void testTokenize_EmptyText() {
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
-            TextPreprocessor.tokenize("");
-        });
-        assertEquals("Input text cannot be null or empty", exception.getMessage());
+    public void testExtractFeaturesWithEmptyInput() {
+        TextPreprocessor preprocessor = new TextPreprocessor();
+        List<String> features = preprocessor.extractFeatures("");
+        assertTrue(features.isEmpty());
     }
-
-    @Test
-    void testTokenize_NullText() {
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
-            TextPreprocessor.tokenize(null);
-        });
-        assertEquals("Input text cannot be null or empty", exception.getMessage());
-    }
-
 
 }

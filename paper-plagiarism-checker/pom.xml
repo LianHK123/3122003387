@@ -32,6 +32,14 @@
             <version>RELEASE</version>
             <scope>test</scope>
         </dependency>
+
+        <dependency>
+            <groupId>com.hankcs</groupId>
+            <artifactId>hanlp</artifactId>
+            <version>RELEASE</version>
+        </dependency>
+
+
     </dependencies>
 
     <build>

@@ -6,18 +6,24 @@ import com.plagiarismchecker.utils.FileHandlerUtil;
 
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
+import java.text.DecimalFormat;
 
 public class Main {
 
     public static void main(String[] args) {
-        if (args.length != 3) {
-            System.out.println("Usage: java -jar main.jar [原文文件] [抄袭版论文的文件] [答案文件]");
-            return;
-        }
+//        if (args.length != 3) {
+//            System.out.println("Usage: java -jar main.jar [原文文件] [抄袭版论文的文件] [答案文件]");
+//            return;
+//        }
+//
+//        String originalFilePath = args[0];
+//        String plagiarizedFilePath = args[1];
+//        String resultFilePath = args[2];
 
-        String originalFilePath = args[0];
-        String plagiarizedFilePath = args[1];
-        String resultFilePath = args[2];
+        String originalFilePath = "src/main/resources/orig.txt";
+        String plagiarizedFilePath = "src/main/resources/orig_0.8_del.txt";
+        String resultFilePath = "src/main/resources/ans.txt";
+
 
         try {
             // 读取文件
@@ -32,12 +38,13 @@ public class Main {
             double similarity = SimilarityCalculator.calculateSimilarity(processedOriginalText, processedPlagiarizedText);
 
             // 输出结果
-            String result = "文本相似度: " + similarity * 100 + "%";
+            DecimalFormat df = new DecimalFormat("0.00");
+            String result = "文本相似度: " + df.format(similarity * 100) + "%";
             FileHandlerUtil.writeFile(resultFilePath, result);
 
             System.out.println(result);
 
-        } catch (IOException | NoSuchAlgorithmException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }

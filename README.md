@@ -115,91 +115,64 @@ paper-plagiarism-checker/
 ### FileHandlerUtil单元测试
 ![](https://github.com/LianHK123/3122003387/blob/main/Assets/FileHandlerUtilTest.png)
 ## 异常处理
-### FileHandlerUtil 类
-该类包含了文件读取和写入的方法。异常主要是 IOException，它可能在文件读取、写入过程中出现。
-
-- 设计目标：
-IOException：处理文件操作相关的错误，例如文件不存在、权限不足、磁盘空间不足等。
-示例代码：
-```
-// 读取文件内容
-public static String readFile(String filePath) throws IOException {
-    return new String(Files.readAllBytes(Paths.get(filePath)));
-}
-
-```
-- 异常场景：
-当指定的文件路径不存在或无法访问时，会抛出 IOException。
-单元测试示例：
-```
-@Test
-public void testReadFile_FileNotFound() {
-    String invalidFilePath = "invalid/path/to/file.txt";
-    assertThrows(IOException.class, () -> {
-        FileHandlerUtil.readFile(invalidFilePath);
-    });
-}
-```
-
-### TextPreprocessor 类
-该类用于文本的预处理，包括分词、去停用词等。异常可能出现在输入文本为空或格式不正确的情况下。
-
-- 设计目标：
-IllegalArgumentException：输入的文本为空或格式不正确时抛出异常。
-示例代码：
-```
-// 去除停用词并分词
-public static List<String> tokenize(String text) {
-    if (text == null || text.trim().isEmpty()) {
-        throw new IllegalArgumentException("Text cannot be null or empty");
-    }
-    text = text.toLowerCase();
-    text = text.replaceAll("[^a-zA-Z ]", ""); // 移除非字母字符
-    String[] words = text.split("\\s+");
-    return Arrays.asList(words);
-}
-```
-- 异常场景：
-当输入文本为 null 或空字符串时，抛出 IllegalArgumentException。
-单元测试示例：
-```
-@Test
-public void testTokenize_EmptyText() {
-    String emptyText = "";
-    assertThrows(IllegalArgumentException.class, () -> {
-        TextPreprocessor.tokenize(emptyText);
-    });
-}
-```
-
 ### SimilarityCalculator 类
-该类包含计算文本相似度的方法。异常主要是 NoSuchAlgorithmException，这是因为哈希算法无法找到时抛出的异常。
+#### 异常处理设计：
 
-- 设计目标：
-NoSuchAlgorithmException：计算哈希值时使用的算法不可用。
-示例代码：
-```
-// 计算文本哈希值
-public static String computeHash(String text) throws NoSuchAlgorithmException {
-    MessageDigest md = MessageDigest.getInstance("SHA-256");
-    byte[] hashBytes = md.digest(text.getBytes());
-    StringBuilder hexString = new StringBuilder();
-    for (byte b : hashBytes) {
-        hexString.append(String.format("%02x", b));
-    }
-    return hexString.toString();
-}
-```
-- 异常场景：
-如果指定的哈希算法（如 SHA-256）不可用，会抛出 NoSuchAlgorithmException。
+- 异常类型：IllegalArgumentException
+- 场景：当输入的文本为空或 null 时，计算相似度的过程会失败。因此需要抛出该异常，避免无效的输入影响计算结果。
 单元测试示例：
 ```
 @Test
-public void testComputeHash_InvalidAlgorithm() {
-    String text = "Hello World";
-    assertThrows(NoSuchAlgorithmException.class, () -> {
-        SimilarityCalculator.computeHash(text);
-    });
+public void testCalculateSimilarityWithNullText() {
+    SimilarityCalculator.calculateSimilarity(null, "some text");
+}
+```
+### TextPreprocessor 类
+#### 异常处理设计：
+
+- 异常类型：IllegalArgumentException
+- 场景：当 tokenize 方法接收到 null 或空字符串作为输入时，会抛出 IllegalArgumentException，避免进一步处理无效文本。
+单元测试示例：
+```
+@Test
+public void testTokenizeWithNullInput() {
+    TextPreprocessor preprocessor = new TextPreprocessor();
+    try {
+        preprocessor.tokenize(null);
+        fail("Expected IllegalArgumentException to be thrown");
+    } catch (IllegalArgumentException e) {
+        assertEquals("Input text cannot be null or empty", e.getMessage());
+    }
+}
+```
+- 异常类型：IllegalArgumentException
+- 场景：extractFeatures 方法在接收到 null 或空字符串时，返回一个空的列表，而不是抛出异常。因此，不需要额外的异常处理。
+单元测试示例：
+```
+@Test
+public void testExtractFeaturesWithEmptyInput() {
+    TextPreprocessor preprocessor = new TextPreprocessor();
+    List<String> features = preprocessor.extractFeatures("");
+    assertTrue(features.isEmpty());
+}
+```
+### FileHandlerUtil 类
+#### 异常处理设计：
+
+- 异常类型：IOException
+-场景：当文件路径无效或文件读取时发生错误时，readFile 方法会抛出 IOException。
+单元测试示例：
+```
+@Test
+public void testReadFileWithInvalidPath() {
+    try {
+        FileHandlerUtil.readFile("non_existent_file.txt");
+        // 如果没有抛出异常，则测试失败
+        fail("Expected NoSuchFileException to be thrown");
+    } catch (IOException e) {
+        // 预期的异常被抛出，测试通过
+        assertTrue(true);
+    }
 }
 ```
 

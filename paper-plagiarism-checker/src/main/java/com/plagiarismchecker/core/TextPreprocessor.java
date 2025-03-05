@@ -5,8 +5,14 @@ import java.util.*;
 public class TextPreprocessor {
 
     private static final Set<String> STOP_WORDS = new HashSet<>(Arrays.asList(
-            "the", "and", "is", "in", "at", "which", "on", "for", "with", "a", "an"
+            "the", "and", "is", "in", "at", "which", "on", "for", "with", "a", "an",
+            "我", "你", "他", "她", "它", "我们", "你们", "他们", "她们", "它们",
+            "的", "了", "是", "在", "不", "一", "有", "和", "就", "都", "不", "一个", "上",
+            "也", "很", "到", "说", "要", "去", "能", "会", "着", "没有", "看", "好", "自己",
+            "这", "那", "有", "很", "只", "对", "也", "着", "就", "不", "要", "都", "是", "在",
+            "一个", "上", "也", "很", "到", "说", "去", "能", "会", "着", "没有", "看", "好", "自己"
     ));
+
 
     // 去除停用词并分词
     public static List<String> tokenize(String text) {

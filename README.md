@@ -65,55 +65,54 @@ paper-plagiarism-checker/
 
 #### SimilarityCalculator相似度计算
 
-![](https://github.com/LianHK123/3122003387/blob/main/Assets/SimilarityCalculator.png)
+![](Assets/SimilarityCalculator.png)
 
 #### 文本处理TextPreprocessor
-![](https://github.com/LianHK123/3122003387/blob/main/Assets/TextPreprocessor.png)
+![](Assets/TextPreprocessor.png)
 
 #### 文件处理FileHandlerUtil
-![](https://github.com/LianHK123/3122003387/blob/main/Assets/FileHandlerUtil.png)
+![](Assets/FileHandlerUtil.png)
 
 
 ### 算法关键/独到之处
 
 -   该检测抄袭算法的独到之处在于其高效的文本预处理和相似度计算方法。通过精细化的文本分词和去除停用词，减少了噪音，提高了后续特征提取和相似度计算的准确性。结合哈希算法与特征提取，能快速、准确地计算文本相似度，特别是在处理改写或格式变动的抄袭时，展现出较强的容错能力。此外，算法的模块化设计使得系统清晰、可扩展，优化了文件读写效率，适用于大规模文本处理。整体而言，该算法兼具高效性和准确性，是一个稳定、灵活的抄袭检测方案。
 
-## 性能改进
+## 性能分析
  
 从Jprofiler分析的结果来看：
-![](https://github.com/LianHK123/3122003387/blob/main/Assets/MemoryAnalyze.png)
+![](Assets/MemoryAnalyze.png)
 ###  **内存使用情况分析（内存分配图）**
    - **内存分配情况**：根据图表，可以看到在程序运行过程中内存的分配情况保持稳定，这说明程序没有频繁的内存波动，也未发生大量的垃圾回收（GC）。绿色的内存条显示程序在内存中占用的稳定区域，基本没有出现内存泄漏的情况。
    - **内存占用**：内存占用非常稳定并且在一定范围内。这意味着大部分内存分配是合适的，且程序没有过度消耗内存。
 
 
 ###  **内存占用最多的类**
-![](https://github.com/LianHK123/3122003387/blob/main/Assets/ClassOccu.png)
-   - 从内存使用的类分析来看，`java.lang.String`、`java.lang.StringBuilder`是占用内存最多的类，分别占据了28%和16%的内存。
-     - **优化建议**：如果`StringBuilder`用得比较频繁，可以考虑进一步优化其使用，尤其是避免频繁创建`String`和`StringBuilder`对象。对于大文本的处理，建议将字符串拼接操作转移到内存更高效的结构上，例如通过流式处理。
-     - `java.lang.String`占用的内存也表明可能存在大量字符串的创建。考虑合并相似操作，避免重复字符串的创建。
+![](Assets/ClassOccu.png)
+   - 从性能分析结果中可以看到，消耗最大资源的函数是 com.hankcs.hanlp.dictionary.CoreDictionary$Attribute 和 com.hankcs.hanlp.corpus.tag.Nature，它们分别消耗了大量的内存和计算时间。优化这些部分的代码可以有效地提高性能。
   
 ### **内存泄漏与无效对象**
    - 从堆栈跟踪中没有发现内存泄漏的迹象。内存中的大部分对象使用量较高，说明系统在处理文本时保持了合理的内存分配。
    - 类似`java.util.HashMap$Node`、`java.util.concurrent.ConcurrentHashMap$Node`的内存占用可能与哈希存储的中间对象有关，如果不加以管理，会增加内存消耗。
 
-###  **优化建议**
-   - **字符串操作优化**：减少不必要的`String`和`StringBuilder`对象创建。尤其是在大规模数据处理时，合并或分批处理字符串。
-   - **使用内存更高效的容器**：考虑对缓存的内容进行压缩或使用内存管理更高效的数据结构。
-   - **文本处理优化**：在`TextPreprocessor`中，尽量避免创建重复的对象，尽量减少不必要的临时变量的生成。
+###  **改进思路：**
+- 缓存计算结果：对于多次计算相似度的场景，可以将计算结果缓存起来，避免重复计算，提高性能。
+- 优化分词和文本处理：避免每次都重新分词，使用内存中的已处理结果，减少重复处理。
+- 并行化处理：如果涉及大量文本的相似度计算，可以通过多线程或并行计算加速。
+- 优化数据结构：对于词频计算，可以使用更高效的数据结构，如Trie树，或选择更高效的算法进行余弦相似度计算。
 
 ## 单元测试
-![](https://github.com/LianHK123/3122003387/blob/main/Assets/PassRate.png)
-- 单元测试通过率75.75%，达到标准。
+![](Assets/PassRate.png)
+- 单元测试通过率76.25%，达到标准。
 
 
 
 ### SimilarityCalculator单元测试
-![](https://github.com/LianHK123/3122003387/blob/main/Assets/SimilarityCalculatorTest.png)
+![](Assets/SimilarityCalculatorTest.png)
 ### TextPreproces单元测试
-![](https://github.com/LianHK123/3122003387/blob/main/Assets/TextPreprocesTest.png)
+![](Assets/TextPreprocesTest.png)
 ### FileHandlerUtil单元测试
-![](https://github.com/LianHK123/3122003387/blob/main/Assets/FileHandlerUtilTest.png)
+![](Assets/FileHandlerUtilTest.png)
 ## 异常处理
 ### SimilarityCalculator 类
 #### 异常处理设计：
